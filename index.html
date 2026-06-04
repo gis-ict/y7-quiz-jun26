@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Year 7 Python Mastery | 50-Point Lab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=JetBrains+Mono:wght@500;700&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --p-yellow: #fff9c4; --p-blue: #bbdefb; --p-green: #b2dfdb;
+            --p-coral: #ffab91; --p-purple: #e1bee7; --p-text: #2c3e50;
+            --white: #ffffff; --wrong: #ff7675; --correct: #55efc4;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Outfit', sans-serif; background: linear-gradient(135deg, var(--p-yellow) 0%, var(--p-blue) 100%); background-attachment: fixed; color: var(--p-text); padding-bottom: 150px; }
+
+        /* Security Gate */
+        #gate { position: fixed; inset: 0; background: var(--p-purple); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+        .gate-card { background: white; padding: 40px; border-radius: 30px; text-align: center; max-width: 450px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.1); border: 4px solid white; }
+
+        header { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(15px); padding: 15px 5%; position: sticky; top: 0; z-index: 1000; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--p-coral); }
+
+        .container { column-count: 3; column-gap: 20px; max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        @media (max-width: 1100px) { .container { column-count: 2; } }
+        @media (max-width: 700px) { .container { column-count: 1; } }
+
+        .pin { display: inline-block; width: 100%; background: white; border-radius: 20px; margin-bottom: 20px; padding: 25px; break-inside: avoid; border: 1px solid #efefef; transition: 0.3s; position: relative; box-shadow: 0 4px 10px rgba(0,0,0,0.02); }
+        .pin.locked-correct { border: 3px solid var(--correct); background: #f2fffb; }
+        .pin.locked-wrong { border: 3px solid var(--wrong); background: #fff5f5; }
+
+        .code-snippet { background: #1e1e1e; color: #d4d4d4; padding: 15px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; margin-bottom: 15px; border-left: 5px solid var(--p-coral); white-space: pre-wrap; line-height: 1.5; }
+        
+        .explanation { font-size: 0.75rem; color: #7f8c8d; background: #f8f9fa; padding: 8px; border-radius: 8px; margin-bottom: 10px; font-weight: 600; text-transform: uppercase; }
+
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 12px; font-family: 'JetBrains Mono'; margin-bottom: 10px; outline: none; transition: 0.2s; background: white; }
+        input:focus { border-color: var(--p-coral); }
+        input:disabled { background: #f1f2f6; border: none; color: #7f8c8d; cursor: not-allowed; }
+
+        .btn-clock { width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 800; background: #e60023; color: white; cursor: pointer; font-family: 'Fredoka'; transition: 0.2s; }
+        .btn-clock:disabled { display: none; }
+
+        .reveal-box { font-size: 0.85rem; font-weight: 600; margin-top: 10px; display: none; padding: 12px; border-radius: 12px; line-height: 1.4; animation: popIn 0.3s ease; }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .reveal-correct { background: #d1f7e6; color: #00b894; }
+        .reveal-wrong { background: #ffe0e0; color: #d63031; }
+
+        #score-board { position: fixed; bottom: 20px; right: 20px; background: white; border: 3px solid var(--p-coral); padding: 15px 30px; border-radius: 50px; z-index: 1000; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #submit-zone { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 25px; text-align: center; border-top: 3px solid var(--p-green); display: none; z-index: 1001; }
+
+        .meme { position: fixed; width: 80px; pointer-events: none; z-index: 5000; animation: floatUp 2.5s ease-out forwards; }
+        @keyframes floatUp { 0% { bottom: 0; opacity: 1; } 100% { bottom: 100vh; transform: rotate(360deg); opacity: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="gate">
+        <div class="gate-card">
+            <h1 style="font-family: 'Fredoka'; color: #e60023; font-size: 2.2rem;">Year 7 Master-Lab</h1>
+            <p style="margin: 15px 0; font-size: 1.1rem; color: #576574;">Teacher: <b>Mr. Rommel</b> | Digital Technologies<br>50 Challenges. No cap, just code.</p>
+            <input type="text" id="fname" placeholder="First Name">
+            <input type="text" id="lname" placeholder="Last Name" style="margin-bottom: 20px;">
+            <button class="btn-clock" onclick="unlock()" style="font-size: 1.2rem; padding: 15px;">INITIALIZE SESSION</button>
+        </div>
+    </div>
+
+    <!-- AUDIO -->
+    <audio id="snd-clock" src="https://assets.mixkit.co/active_storage/sfx/2013/2013-preview.mp3" preload="auto"></audio>
+    <audio id="snd-bruh" src="https://www.myinstants.com/media/sounds/bruh.mp3" preload="auto"></audio>
+
+    <header>
+        <div>
+            <h1 style="font-family:'Fredoka'; color:#e60023; font-size: 1.8rem;">📍 Year 7 Master Board</h1>
+            <div style="font-size:0.75rem; font-weight:800; color:#7f8c8d; letter-spacing: 1px;" id="student-name">PLAYER: WAITING...</div>
+        </div>
+        <div style="font-family: 'Fredoka'; font-size: 0.9rem; color: #888;">GIS YEAR 7 | DT</div>
+    </header>
+
+    <div id="score-board">
+        <div style="font-size: 0.7rem; font-weight: 800; color: #7f8c8d;">TOTAL XP</div>
+        <div style="font-size: 1.8rem; font-weight: 800; color: #e60023;"><span id="score">0</span> / 50</div>
+    </div>
+
+    <div class="container" id="grid"></div>
+
+    <div id="submit-zone">
+        <button class="btn-clock" style="background:#55efc4; color:#2c3e50; max-width:450px; font-size: 1.2rem;" id="final-btn" onclick="sendData()">SEND TO MR. ROMMEL 🚀</button>
+    </div>
+
+    <script>
+        // !! TEACHER: PASTE YOUR APPS SCRIPT URL HERE !!
+        const SCRIPT_URL = "YOUR_SCRIPT_URL_HERE";
+
+        const challenges = [
+            // ARITHMETIC & MODULO (Source: rommelalbon.github.io/year7-break-arithmetic-modulo/)
+            { id: 1, title: "Modulo Remainder", exp: "Modulo (%) calculates what is leftover.", code: "print(17 % 5)", ans: "2", hint: "5 goes into 17 three times (15), leaving 2." },
+            { id: 2, title: "Floor Division", exp: "Symbol that divides and ignores decimals:", code: "print(10 __ 3) # Result is 3", ans: "//", hint: "Floor division (//) chops off the remainder." },
+            { id: 3, title: "Power Up", exp: "Symbol for Exponents (Powers):", code: "2 __ 3 # Result is 8", ans: "**", hint: "Double asterisk (**) is for powers." },
+            { id: 4, title: "Even Logic", exp: "What is the remainder if 20 is even?", code: "print(20 % 2)", ans: "0", hint: "Even numbers divided by 2 always have 0 leftover." },
+            { id: 5, title: "Odd Logic", exp: "What is the remainder if 15 is odd?", code: "print(15 % 2)", ans: "1", hint: "Odd numbers divided by 2 always have 1 leftover." },
+            { id: 6, title: "Division Result", exp: "In Python, what is 10 / 2?", code: "print(10 / 2)", ans: "5.0", hint: "Standard division (/) always returns a float." },
+            { id: 7, title: "Math Order", exp: "Calculate 2 + 3 * 2:", code: "print(2 + 3 * 2)", ans: "8", hint: "Multiplication happens before addition (BODMAS)." },
+            { id: 8, title: "Floor Test", exp: "What is 15 // 4?", code: "print(15 // 4)", ans: "3", hint: "4 fits into 15 three whole times." },
+            { id: 9, title: "Negative Modulo", exp: "Modulo with a negative result?", code: "print(-10 % 3)", ans: "2", hint: "Python modulo always follows the divisor's sign." },
+            { id: 10, title: "The Accumulator", exp: "What is the total?", code: "t = 0\nfor i in [1, 2, 3]:\n  t += i", ans: "6", hint: "0 + 1 + 2 + 3 = 6." },
+
+            // TUPLES (Source: github.com/rommelalbon/year7tuple)
+            { id: 11, title: "Tuple Brackets", exp: "Brackets used for a Tuple:", code: "data = __1, 2__", ans: "()", hint: "Tuples use parentheses ( )." },
+            { id: 12, title: "Immutability", exp: "Can you change a value inside a Tuple?", code: "t = (1, 2)\nt[0] = 5 # Error or OK?", ans: "error", hint: "Tuples are Immutable (cannot be changed)." },
+            { id: 13, title: "Tuple Index", exp: "Get 'Apple' from this tuple:", code: "t = ('Apple', 'Pear')\nprint(t[__])", ans: "0", hint: "Indexing starts at zero." },
+            { id: 14, title: "Tuple Slice", exp: "What prints from t[1:3]?", code: "t = (1, 2, 3, 4)\nprint(t[1:3])", ans: "(2, 3)", hint: "Starts at 1, stops BEFORE 3." },
+            { id: 15, title: "Tuple Length", exp: "Count the items in this tuple:", code: "t = (1, 2, 3)\nlen(t)", ans: "3", hint: "The len() function counts items." },
+            { id: 16, title: "Locked Data", exp: "Another word for 'unchangeable':", code: "Tuples are ____.", ans: "immutable", hint: "Immutable means cannot be modified." },
+            { id: 17, title: "Comma Count", exp: "Result of type((5)):", code: "print(type((5)))", ans: "int", hint: "Without a comma, it's just a number. (5,) is a tuple." },
+            { id: 18, title: "Tuple Add", exp: "Can you use .append() on a Tuple?", code: "t.append(10)", ans: "no", hint: "Tuples do not have an append method." },
+            { id: 19, title: "Nested Tuple", exp: "What is t[1][0]?", code: "t = (1, (2, 3))\nprint(t[1][0])", ans: "2", hint: "Accessing the first item of the second item." },
+            { id: 20, title: "Tuple Repeat", exp: "What is (1, 2) * 2?", code: "print((1, 2) * 2)", ans: "(1, 2, 1, 2)", hint: "Multiplying a tuple repeats the elements." },
+
+            // LOOPS & BREAK (Source: rommelalbon.github.io/year7-break-arithmetic-modulo/)
+            { id: 21, title: "Range Boundary", exp: "How many times does range(1, 5) run?", code: "for i in range(1, 5):", ans: "4", hint: "It stops before 5 (1, 2, 3, 4)." },
+            { id: 22, title: "Stop the Loop", exp: "Keyword to exit a loop immediately:", code: "if x == 0:\n  ____", ans: "break", hint: "Break stops the current loop." },
+            { id: 23, title: "While Logic", exp: "Loop that runs as long as it's True:", code: "____ health > 0:", ans: "while", hint: "While loops need a condition check." },
+            { id: 24, title: "Nested Loop", exp: "How many 'Hi' print?", code: "for i in range(2):\n  for j in range(3):\n    print('Hi')", ans: "6", hint: "2 times 3 equals 6." },
+            { id: 25, title: "Range Default", exp: "First number in range(10)?", code: "range(10)", ans: "0", hint: "The default starting point is 0." },
+            { id: 26, title: "Infinite Danger", exp: "Loop without a break condition:", code: "while True:\n  print('loop')", ans: "infinite", hint: "It will never stop!" },
+            { id: 27, title: "Loop Else", exp: "Part of a loop that runs at the end:", code: "for i in range(5):\n  ...\n____:", ans: "else", hint: "Loop-Else runs if no break happened." },
+            { id: 28, title: "Decrement", exp: "Code to subtract 1 from x:", code: "x = x ____ 1", ans: "-=", hint: "-= is the compound subtract symbol." },
+            { id: 29, title: "Iterate", exp: "Word for going through a list item-by-item:", code: "To ____ through a list.", ans: "iterate", hint: "Iteration is the act of looping." },
+            { id: 30, title: "List Loop", exp: "Get items from L = ['A', 'B']:", code: "for x ____ L:", ans: "in", hint: "Use 'in' to loop through a collection." },
+
+            // STRINGS & SLICING (Source: gisy7.tiiny.site)
+            { id: 31, title: "String Slice", exp: "What is 'Python'[0:2]?", code: "print('Python'[0:2])", ans: "Py", hint: "Stops before index 2." },
+            { id: 32, title: "Screaming", exp: "Make 'hi' uppercase:", code: "'hi'.____()", ans: "upper", hint: ".upper() changes the case." },
+            { id: 33, title: "f-string", exp: "Letter used for variables in text:", code: "____'Hello {user}'", ans: "f", hint: "F-strings are for formatting." },
+            { id: 34, title: "New Line", exp: "Code for skipping a line:", code: "print('A__B')", ans: "\\n", hint: "Backslash n is for newline." },
+            { id: 35, title: "Length", exp: "Count string characters:", code: "____('GIS')", ans: "len", hint: "len() measures size." },
+            { id: 36, title: "String Cast", exp: "Turn 10 into '10':", code: "____(10)", ans: "str", hint: "str() turns anything to string." },
+            { id: 37, title: "Multiply Str", exp: "Result of 'A' * 3:", code: "print('A' * 3)", ans: "AAA", hint: "Strings repeat when multiplied." },
+            { id: 38, title: "Membership", exp: "Check if 'x' is in 'box':", code: "print('x' ____ 'box')", ans: "in", hint: "Membership operator." },
+            { id: 39, title: "String Index", exp: "Last letter of 'GIS'?", code: "'GIS'[__]", ans: "2", hint: "G=0, I=1, S=2." },
+            { id: 40, title: "Join", exp: "Symbol to join two strings:", code: "'A' ____ 'B'", ans: "+", hint: "Concatenation uses plus." },
+
+            // LOGIC & ARCHITECTURE
+            { id: 41, title: "Equal Check", exp: "Symbol to compare equality:", code: "if x ____ 10:", ans: "==", hint: "== asks if they are equal." },
+            { id: 42, title: "Not Equal", exp: "Symbol for not equal:", code: "if x ____ y:", ans: "!=", hint: "!= checks if different." },
+            { id: 43, title: "Option B", exp: "Keyword for second choice:", code: "elif", ans: "elif", hint: "Short for else if." },
+            { id: 44, title: "Colon Fix", exp: "Missing end symbol for IF:", code: "if x > 0__", ans: ":", hint: "Every logic line needs a colon." },
+            { id: 45, title: "Indentation", exp: "Spaces for a Python block:", code: "____print('Hi')", ans: "4", hint: "Python uses 4 spaces." },
+            { id: 46, title: "Bool Capital", exp: "Correct spelling for 'true':", code: "____", ans: "True", hint: "Capital T is required." },
+            { id: 47, title: "Logic Reverse", exp: "Keyword to flip a boolean:", code: "____ True", ans: "not", hint: "not True is False." },
+            { id: 48, title: "Dict Bracket", exp: "Brackets for Dictionary:", code: "{}", ans: "{}", hint: "Curly braces for dicts." },
+            { id: 49, title: "Set unique", exp: "Do sets allow duplicates?", code: "{1, 1, 2}", ans: "no", hint: "Sets only store unique items." },
+            { id: 50, title: "Input Type", exp: "Type returned by input()?", code: "str", ans: "str", hint: "Input always starts as text." }
+        ];
+
+        let score = 0;
+        let answeredCount = 0;
+        let userData = { firstName: "", lastName: "" };
+
+        function unlock() {
+            userData.firstName = document.getElementById('fname').value.trim();
+            userData.lastName = document.getElementById('lname').value.trim();
+            if (userData.firstName && userData.lastName) {
+                document.getElementById('gate').style.display = 'none';
+                document.getElementById('student-name').innerText = `CODER: ${userData.firstName.toUpperCase()} ${userData.lastName.toUpperCase()}`;
+                
+                // Initialize audio contexts
+                const s = document.getElementById('snd-clock');
+                const b = document.getElementById('snd-bruh');
+                s.play().then(() => s.pause());
+                b.play().then(() => b.pause());
+                
+                buildGrid();
+            } else { alert("Identify yourself, Master Coder!"); }
+        }
+
+        function buildGrid() {
+            const grid = document.getElementById('grid');
+            challenges.forEach((q, idx) => {
+                const pin = document.createElement('div');
+                pin.className = 'pin';
+                pin.id = `pin-${idx}`;
+                pin.innerHTML = `
+                    <div class="explanation">Phase #${q.id} ${q.exp}</div>
+                    <h3 style="color:#e60023">${q.title}</h3>
+                    <div class="code-snippet">${q.code}</div>
+                    <input type="text" id="in-${idx}" placeholder="Fix the code...">
+                    <button class="btn-clock" id="btn-${idx}" onclick="verify(${idx})">CLOCK IT!</button>
+                    <div class="reveal-box" id="rev-${idx}"></div>
+                `;
+                grid.appendChild(pin);
+            });
+        }
+
+        function verify(idx) {
+            const q = challenges[idx];
+            const input = document.getElementById(`in-${idx}`);
+            const btn = document.getElementById(`btn-${idx}`);
+            const pin = document.getElementById(`pin-${idx}`);
+            const rev = document.getElementById(`rev-${idx}`);
+            const userVal = input.value.trim().toLowerCase().replace(/\s/g, '');
+            const correctVal = q.ans.toLowerCase().replace(/\s/g, '');
+
+            input.disabled = true;
+            btn.disabled = true;
+            answeredCount++;
+
+            if (userVal === correctVal) {
+                document.getElementById('snd-clock').currentTime = 0;
+                document.getElementById('snd-clock').play();
+                pin.classList.add('locked-correct');
+                rev.innerHTML = `✨ SLAY! <br> ${q.hint}`;
+                rev.className = "reveal-box reveal-correct";
+                rev.style.display = "block";
+                score++;
+                document.getElementById('score').innerText = score;
+                spawnMemes('slay');
+            } else {
+                document.getElementById('snd-bruh').currentTime = 0;
+                document.getElementById('snd-bruh').play();
+                pin.classList.add('locked-wrong');
+                rev.innerHTML = `💀 COOKED. Answer was: <b>${q.ans}</b> <br> ${q.hint}`;
+                rev.className = "reveal-box reveal-wrong";
+                rev.style.display = "block";
+                spawnMemes('sus');
+            }
+
+            if(answeredCount === challenges.length) {
+                document.getElementById('submit-zone').style.display = 'block';
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }
+        }
+
+        function spawnMemes(type) {
+            const urls = type === 'slay' ? 
+                ['https://em-content.zobj.net/source/apple/354/sparkles_2728.png', 'https://em-content.zobj.net/source/apple/354/nail-polish_1f485.png'] :
+                ['https://em-content.zobj.net/source/apple/354/skull_1f480.png', 'https://em-content.zobj.net/source/apple/354/face-with-monocle_1f9d0.png'];
+            
+            for(let i=0; i<12; i++) {
+                const img = document.createElement('img');
+                img.src = urls[Math.floor(Math.random() * urls.length)];
+                img.className = 'meme';
+                img.style.left = Math.random() * 85 + "vw";
+                document.body.appendChild(img);
+                setTimeout(() => img.remove(), 2500);
+            }
+        }
+
+        async function sendData() {
+            const finalBtn = document.getElementById('final-btn');
+            finalBtn.disabled = true;
+            finalBtn.innerText = "UPLOADING TO GRADEBOOK... 🍳";
+
+            const data = { firstName: userData.firstName, lastName: userData.lastName, score: score };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                alert("W! Your Year 7 Mastery Score (" + score + "/50) has been recorded.");
+                finalBtn.innerText = "MISSION COMPLETE ✅";
+                finalBtn.style.background = "#bdc3c7";
+            } catch (e) {
+                alert("Connection error! Take a screenshot of your score and email it to Mr. Rommel.");
+                finalBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
